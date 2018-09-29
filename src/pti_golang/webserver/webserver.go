@@ -14,18 +14,18 @@ import (
 )
 
 type ResponseMessage struct {
-    price float32
-    makes string
-    model string
-    nodias float32
-    nounits float32
+    Price int
+    Makes string
+    Model string
+    Nodias int
+    Nounits int
 }
 
 type RequestMessage struct {
-    makes string
-    model string
-    nodias float32
-    nounits float32
+    Makes string
+    Model string
+    Nodias int
+    Nounits int
 }
 
 
@@ -46,7 +46,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 func endpointFunc(w http.ResponseWriter, r *http.Request) {
     vars := mux.Vars(r)
     param := vars["param"]
-    res := ResponseMessage{model: "Text1", makes: param}
+    res := ResponseMessage{Model: "Text1", Makes: param}
     json.NewEncoder(w).Encode(res)
 }
 func endpointFunc2JSONInput(w http.ResponseWriter, r *http.Request) {
@@ -65,7 +65,7 @@ func endpointFunc2JSONInput(w http.ResponseWriter, r *http.Request) {
             panic(err)
         }
     } else {
-        fmt.Fprintln(w, "Successfully received request with Field1 =", requestMessage.model)
+        fmt.Fprintln(w, "Successfully received request with Field1 =", requestMessage.Model)
         fmt.Println(r.FormValue("queryparam1"))
     }
 }
@@ -74,22 +74,26 @@ func rentalFunc(w http.ResponseWriter, r *http.Request) {
     var requestMessage RequestMessage
     body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
     if err != nil {
+        fmt.Fprintln(w, "error 1")
         panic(err)
     }
     if err := r.Body.Close(); err != nil {
+        fmt.Fprintln(w, "error 2")
         panic(err)
     }
     if err := json.Unmarshal(body, &requestMessage); err != nil {
+        fmt.Fprintln(w, "error 3")
         w.Header().Set("Content-Type", "application/json; charset=UTF-8")
         w.WriteHeader(422) // unprocessable entity
         if err := json.NewEncoder(w).Encode(err); err != nil {
             panic(err)
         }
     } else {
-        var price float32
-        price = (requestMessage.nodias)*(requestMessage.nounits)
+        //fmt.Fprintln(w, "Service OK")
+        price := (requestMessage.Nodias)*(requestMessage.Nounits)*3
         fmt.Fprintln(w, "Price of rental= ", price)
-        fmt.Println("\n\n Make: %s \n Model: %s \n Número de días: %d \n Número de unidades: %d \n",requestMessage.makes,requestMessage.model,requestMessage.nodias,requestMessage.nounits)
+        i := fmt.Sprintf("\n\n Make: %#v \n Model: %#v \n Número de días: %#v \n Número de unidades: %#v \n",requestMessage.Makes,requestMessage.Model,requestMessage.Nodias,requestMessage.Nounits)
+        fmt.Println(i)
     }
 }
 

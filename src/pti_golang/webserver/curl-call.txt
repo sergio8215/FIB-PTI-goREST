@@ -1,1 +1,0 @@
-curl -H "Content-Type: application/json" -d '{"make":"toyota", "model":"corola","nodias":"10","nounits":"1"}' http://localhost:8080/rental
