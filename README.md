@@ -116,9 +116,10 @@ Edit $HOME/go/src/pti_golang/webserver/webserver.go
 
     } 
 
-Build (will create an executable within $HOME/go/bin/webserver):
+Build (will create an executable within $HOME/go/bin/webserver), has to do everytime you edit the files:
 
     go install pti_golang/webserver
+    
 
 Run:
 
@@ -130,8 +131,11 @@ Kill the process before going through the next steps.
     
 ## 4 URL routing
     
-An web API exposes different functionalities. These functionalities are accessed through different URL routes or endpoints. We need a mechanism that let us map URL routes into calls to different functions in our code. The standard golang library offers a [too complex routing mechanism](https://husobee.github.io/golang/url-router/2015/06/15/why-do-all-golang-url-routers-suck.html), so we will use an external library for that (mux router from the Gorilla Web Toolkit):
+An web API exposes different functionalities. These functionalities are accessed through different URL routes or endpoints. We need a mechanism that let us map URL routes into calls to different functions in our code. The standard golang library offers a [too complex routing mechanism](https://husobee.github.io/golang/url-router/2015/06/15/why-do-all-golang-url-routers-suck.html), so we will use an external library for that (mux router from the Gorilla Web Toolkit), but first be sure you did:
 
+    export GOROOT=/usr/local/go
+    export GOPATH=$HOME/go
+    export PATH=$PATH:$GOROOT/bin
     go get "github.com/gorilla/mux"
 
 (check that a new package object has been created within $HOME/go/pkg).
