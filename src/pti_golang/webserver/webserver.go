@@ -10,7 +10,8 @@ import (
     "io/ioutil"
     "encoding/csv"
     "os"
- //   "bufio"
+    "strconv"
+    "bufio"
 )
 
 type ResponseMessage struct {
@@ -34,7 +35,8 @@ router := mux.NewRouter().StrictSlash(true)
 router.HandleFunc("/", Index)
 router.HandleFunc("/endpoint/{param}", endpointFunc)
 router.HandleFunc("/endpoint2/{param}", endpointFunc2JSONInput)
-router.HandleFunc("/rentals", rentalFunc)
+router.HandleFunc("/newrental", rentalFunc)
+router.HandleFunc("/listrental", listRentalsFunc)
 
 log.Fatal(http.ListenAndServe(":8080", router))
 }
@@ -94,20 +96,39 @@ func rentalFunc(w http.ResponseWriter, r *http.Request) {
         fmt.Fprintln(w, "Price of rental= ", price)
         i := fmt.Sprintf("\n\n Make: %#v \n Model: %#v \n Número de días: %#v \n Número de unidades: %#v \n",requestMessage.Makes,requestMessage.Model,requestMessage.Nodias,requestMessage.Nounits)
         fmt.Println(i)
+
+        file, err := os.OpenFile("rentals.csv", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+        if err!=nil {
+            json.NewEncoder(w).Encode(err)
+            return
+        }
+        writer := csv.NewWriter(file)
+        ndias := strconv.Itoa(requestMessage.Nodias)
+        nunits := strconv.Itoa(requestMessage.Nounits)
+        var data1 = []string{requestMessage.Makes,requestMessage.Model,ndias,nunits}
+        writer.Write(data1)
+        writer.Flush()
+        file.Close()
+
     }
 }
 
-
-func writeToFile(w http.ResponseWriter) {
-    file, err := os.OpenFile("rentals.csv", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+func listRentalsFunc(w http.ResponseWriter, r *http.Request){
+    file, err := os.Open("rentals.csv")    
     if err!=nil {
         json.NewEncoder(w).Encode(err)
         return
     }
-    writer := csv.NewWriter(file)
-    var data1 = []string{"Toyota", "Celica"}
-    writer.Write(data1)
-    writer.Flush()
-    file.Close()
+    reader := csv.NewReader(bufio.NewReader(file))
+    i := 0
+    for {
+        record, err := reader.Read()
+        if err == io.EOF {
+            break
+        }
+        i++
+
+        fmt.Fprintf(w, "The %d rental is: %q \n", i,record)
+    }
 }
 
